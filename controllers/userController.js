@@ -60,6 +60,11 @@ export function loginUser(req, res) {
 			});
 		} else {
 			const isPasswordCorrect = bcrypt.compareSync(password, user.password);
+			
+			//check for user.isDisabled
+			//check for invalid attempts
+			//if invalid attempts > 3 AND user.blockUntil > Date.now() res
+			
 			if (isPasswordCorrect) {
 				
 				const userData = {
@@ -73,11 +78,14 @@ export function loginUser(req, res) {
 				}
 				console.log(userData)
 
-				const token = jwt.sign(userData,process.env.JWT_KEY)
+				const token = jwt.sign(userData,process.env.JWT_KEY,{
+					expiresIn : "48hrs"
+				})
 
 				res.json({
 					message: "Login successful",
 					token: token,
+					user : userData
 				});
 
 
@@ -85,6 +93,11 @@ export function loginUser(req, res) {
 				res.status(403).json({
 					message: "Invalid password",
 				});
+				//user -> blockUntil = Date.now() + 5*60*1000
+				//user -> inValidAttempts = default=0 +1
+				//if(user.inValidAttempts > 3){
+				//	user.isDisabled = true
+				//
 			}
 		}
 	});
